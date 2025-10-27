@@ -3,7 +3,9 @@ import type { AxiosInstance } from "axios";
 import type { WalletClient } from "viem";
 import { withPaymentInterceptor } from "x402-axios";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3001";
+// Use relative URL in production (Vercel), absolute URL in development
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ||
+  (import.meta.env.MODE === 'production' ? '' : 'http://localhost:3001');
 
 // Base axios instance without payment interceptor
 const baseApiClient = axios.create({

@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { WalletConnect } from './components/WalletConnect';
 import { useWallet } from './contexts/WalletContext';
 import { api, updateApiClient, type FortuneResponse, type StatsResponse } from './services/api';
 import './App.css';
@@ -104,15 +103,6 @@ function App() {
       )}
 
       <div className="container">
-        {walletClient && (
-          <div className="wallet-section">
-            <WalletConnect />
-            <div className="wallet-info">
-              ✅ Ready to receive wisdom for just $0.01 USDC
-            </div>
-          </div>
-        )}
-
         <div className="main-content">
           {!showFortune ? (
             <>
@@ -199,17 +189,6 @@ function App() {
             </div>
           )}
         </div>
-
-        <footer className="footer">
-          <p>Built with <strong>x402</strong> (micropayments) + <strong>OpenAI</strong> (AI wisdom)</p>
-          <p className="footer-links">
-            <a href="https://x402.org" target="_blank" rel="noopener noreferrer">x402.org</a>
-            {' • '}
-            <a href="https://github.com/coinbase/x402" target="_blank" rel="noopener noreferrer">GitHub</a>
-            {' • '}
-            Perfect for AI agent payments & autonomous transactions
-          </p>
-        </footer>
       </div>
     </div>
   );
