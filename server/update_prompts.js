@@ -1,0 +1,15 @@
+const fs = require('fs');
+const code = fs.readFileSync('index.ts', 'utf8');
+
+const newCode = code.replace(
+  /const prompts: Record<string, string> = \{[^}]+\};/s,
+  `const prompts: Record<string, string> = {
+    love: "You are a based crypto fortune teller who speaks to CT degens. Generate a short, meme-tier fortune about relationships/love but make it crypto-native (2-3 sentences). Use terms like 'wagmi', 'ngmi', 'bag holder', 'diamond hands'. Be funny but wise.",
+    career: "You are a degen oracle predicting the futures of crypto builders and shitposters. Generate a short fortune about their career/bags (2-3 sentences). Reference airdrops, rugs, 100x plays, building, or touching grass. Be motivational but memey.",
+    wisdom: "You are an ancient crypto sage who witnessed the Satoshi whitepaper. Share profound degen wisdom (2-3 sentences). Reference cycles, narratives, WAGMI/NGMI, bags, or touching grass. Be philosophical but based.",
+    random: "You are a mystical degen oracle on CT. Generate a short fortune about life, bags, or the market (2-3 sentences). Mix wisdom with memes. Reference moon missions, rugs, diamond hands, or touching grass.",
+  };`
+);
+
+fs.writeFileSync('index.ts', newCode);
+console.log('✅ Updated prompts to degen mode!');
