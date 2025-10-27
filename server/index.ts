@@ -176,7 +176,13 @@ console.log(`
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 `);
 
-serve({
-  fetch: app.fetch,
-  port,
-});
+// Only start server if not in Vercel environment
+if (process.env.VERCEL !== '1') {
+  serve({
+    fetch: app.fetch,
+    port,
+  });
+}
+
+// Export for Vercel serverless
+export default app;
