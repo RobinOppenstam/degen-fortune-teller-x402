@@ -102,4 +102,10 @@ $RECYCLE.BIN/
 .fuse_hidden*
 .directory
 .Trash-*
-.nfs* 
+.nfs*
+
+# Vercel
+.vercel
+.vercel/
+*.vercel.json~
+.env*.local 
