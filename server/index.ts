@@ -29,10 +29,13 @@ if (missingVars.length > 0) {
   }
 }
 
-// Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: openaiApiKey,
-});
+// Initialize OpenAI client (only if API key is available)
+let openai: OpenAI | null = null;
+if (openaiApiKey) {
+  openai = new OpenAI({
+    apiKey: openaiApiKey,
+  });
+}
 
 const app = new Hono();
 
@@ -59,21 +62,24 @@ let fortuneStats = {
 };
 
 // Configure x402 payment middleware - ONE ENDPOINT, ONE PRICE
-app.use(
-  paymentMiddleware(
-    payTo,
-    {
-      // AI Fortune Teller - $0.01 per reading
-      "/api/fortune": {
-        price: "$0.01",
-        network,
+// Only initialize if we have a valid payTo address
+if (payTo) {
+  app.use(
+    paymentMiddleware(
+      payTo,
+      {
+        // AI Fortune Teller - $0.01 per reading
+        "/api/fortune": {
+          price: "$0.01",
+          network,
+        },
       },
-    },
-    {
-      url: facilitatorUrl,
-    },
-  ),
-);
+      {
+        url: facilitatorUrl,
+      },
+    ),
+  );
+}
 
 // Free endpoint - health check
 app.get("/api/health", (c) => {
@@ -107,6 +113,10 @@ app.get("/api/stats", (c) => {
 
 // Generate fortune using OpenAI
 async function generateFortune(category: string, userInput?: string): Promise<string> {
+  if (!openai) {
+    throw new Error("OpenAI client not initialized - missing API key");
+  }
+
   const prompts: Record<string, string> = {
     love: "You are a based crypto fortune teller who speaks to CT degens. Generate a short, meme-tier fortune about relationships/love but make it crypto-native (2-3 sentences). Use terms like 'wagmi', 'ngmi', 'bag holder', 'diamond hands'. Be funny but wise.",
     career: "You are a degen oracle predicting the futures of crypto builders and shitposters. Generate a short fortune about their career/bags (2-3 sentences). Reference airdrops, rugs, 100x plays, building, or touching grass. Be motivational but memey.",
