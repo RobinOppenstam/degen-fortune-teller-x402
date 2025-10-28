@@ -14,14 +14,19 @@ const network = (process.env.NETWORK as Network) || "base-sepolia";
 const port = parseInt(process.env.PORT || "3001");
 const openaiApiKey = process.env.OPENAI_API_KEY;
 
-if (!payTo) {
-  console.error("❌ Please set your wallet ADDRESS in the .env file");
-  process.exit(1);
-}
+// Validate environment variables (but don't exit in serverless mode)
+const missingVars: string[] = [];
+if (!payTo) missingVars.push("ADDRESS");
+if (!openaiApiKey) missingVars.push("OPENAI_API_KEY");
 
-if (!openaiApiKey) {
-  console.error("❌ Please set your OPENAI_API_KEY in the .env file");
-  process.exit(1);
+if (missingVars.length > 0) {
+  const errorMsg = `❌ Missing required environment variables: ${missingVars.join(", ")}`;
+  console.error(errorMsg);
+
+  // Only exit if running locally (not in Vercel serverless)
+  if (process.env.VERCEL !== '1') {
+    process.exit(1);
+  }
 }
 
 // Initialize OpenAI client
@@ -84,6 +89,15 @@ app.get("/api/health", (c) => {
 
 // Free endpoint - get stats (for showcasing)
 app.get("/api/stats", (c) => {
+  // Check if server is properly configured
+  if (!payTo || !openaiApiKey) {
+    return c.json({
+      error: "Server configuration error",
+      message: "Missing required environment variables. Please configure ADDRESS and OPENAI_API_KEY in Vercel settings.",
+      missingVars: missingVars,
+    }, 500);
+  }
+
   return c.json({
     totalFortunes: fortuneStats.totalFortunes,
     totalRevenue: `$${fortuneStats.totalRevenue.toFixed(2)}`,
@@ -127,6 +141,15 @@ async function generateFortune(category: string, userInput?: string): Promise<st
 // PAID ENDPOINT - Get AI Fortune ($0.01)
 app.post("/api/fortune", async (c) => {
   try {
+    // Check if server is properly configured
+    if (!payTo || !openaiApiKey) {
+      return c.json({
+        error: "Server configuration error",
+        message: "Missing required environment variables. Please configure ADDRESS and OPENAI_API_KEY in Vercel settings.",
+        missingVars: missingVars,
+      }, 500);
+    }
+
     const body = await c.req.json().catch(() => ({}));
     const category = body.category || "random";
     const question = body.question || "";
