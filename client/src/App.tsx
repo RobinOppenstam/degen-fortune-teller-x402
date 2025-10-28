@@ -58,7 +58,11 @@ function App() {
       setQuestion('');
     } catch (error: any) {
       console.error('Fortune error:', error);
-      setError(error.response?.data?.error || error.message || 'Failed to get fortune');
+      const errorMessage = error.response?.data?.error ||
+                          error.response?.data?.message ||
+                          error.message ||
+                          'Failed to get fortune';
+      setError(typeof errorMessage === 'string' ? errorMessage : JSON.stringify(errorMessage));
     } finally {
       setLoading(false);
     }
