@@ -39,14 +39,33 @@ if (openaiApiKey) {
 
 const app = new Hono();
 
-// Enable CORS for frontend
+// Enable CORS for frontend (allow Vercel frontend to connect)
+const allowedOrigins = [
+  'http://localhost:5173', // Local development
+  'http://localhost:3000', // Local Next.js (if used)
+  process.env.FRONTEND_URL, // Production Vercel URL
+].filter(Boolean);
+
 app.use("/*", cors({
   origin: (origin) => {
-    // Allow all origins in production (Vercel deployment)
-    // In production, same-origin requests work automatically
-    return origin || '*';
+    // Allow requests with no origin (like mobile apps, curl, Postman)
+    if (!origin) return '*';
+
+    // Allow any Vercel preview/production URL
+    if (origin.includes('.vercel.app')) return origin;
+
+    // Allow configured origins
+    if (allowedOrigins.includes(origin)) return origin;
+
+    // Allow all in development
+    if (process.env.NODE_ENV === 'development') return origin;
+
+    // Default allow (Railway will be the backend)
+    return origin;
   },
   credentials: true,
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Payment-Required', 'X-Payment-Details'],
+  exposedHeaders: ['X-Payment-Required', 'X-Payment-Details'],
 }));
 
 // Track fortune stats (for showcasing)
@@ -198,6 +217,7 @@ console.log(`
 💰 Accepting payments to: ${payTo}
 🔗 Network: ${network}
 🌐 Port: ${port}
+🚀 Environment: ${process.env.NODE_ENV || 'development'}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🎯 Micropayment Model:
    - AI Fortune Reading: $0.01 USDC
@@ -213,13 +233,11 @@ console.log(`
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 `);
 
-// Only start server if not in Vercel environment
-if (process.env.VERCEL !== '1') {
-  serve({
-    fetch: app.fetch,
-    port,
-  });
-}
+// Always start server (for Railway deployment)
+serve({
+  fetch: app.fetch,
+  port,
+});
 
-// Export for Vercel serverless
+// Export for compatibility
 export default app;

@@ -1,0 +1,7 @@
+# Ignore client files (we only deploy the server on Railway)
+client/
+node_modules/
+.git/
+*.md
+.env
+.env.local

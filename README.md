@@ -340,27 +340,76 @@ All tracked on-chain. All transparent. All autonomous.
 
 ## 🚢 Deploy to Production
 
-### Vercel (Recommended)
+This project uses a **split deployment architecture**:
+- **Frontend** → Vercel (static React app)
+- **Backend** → Railway (Hono server with x402)
+
+### Step 1: Deploy Backend to Railway
+
+1. **Push to GitHub:**
+   ```bash
+   git push origin main
+   ```
+
+2. **Deploy on Railway:**
+   - Go to [railway.app](https://railway.app)
+   - Create new project → Deploy from GitHub repo
+   - Select your repository
+   - Railway auto-detects the config from `railway.toml`
+
+3. **Configure Environment Variables** in Railway:
+   ```
+   ADDRESS=0xYourWalletAddress
+   OPENAI_API_KEY=sk-your-openai-api-key
+   NETWORK=base-sepolia
+   FACILITATOR_URL=https://x402.org/facilitator
+   NODE_ENV=production
+   ```
+
+4. **Get your Railway URL** (e.g., `https://your-app.up.railway.app`)
+
+### Step 2: Deploy Frontend to Vercel
+
+1. **Update frontend config** with your Railway backend URL:
+   ```bash
+   echo "VITE_API_BASE_URL=https://your-app.up.railway.app" > client/.env.production
+   git add client/.env.production
+   git commit -m "Configure production API URL"
+   git push
+   ```
+
+2. **Deploy on Vercel:**
+   - Go to [vercel.com](https://vercel.com)
+   - Import your GitHub repository
+   - Vercel auto-detects the config from `vercel.json`
+   - Add environment variable:
+     ```
+     VITE_API_BASE_URL=https://your-app.up.railway.app
+     ```
+   - Click Deploy
+
+3. **Update CORS** (Optional but recommended):
+   - Go back to Railway
+   - Add environment variable:
+     ```
+     FRONTEND_URL=https://your-app.vercel.app
+     ```
+
+### Alternative: Local Testing
 
 ```bash
-# Install Vercel CLI
-npm i -g vercel
+# Terminal 1: Start backend
+cd server
+npm install
+npm run dev
 
-# Deploy
-cd payment-app
-vercel --prod
-
-# Set environment variables in Vercel dashboard:
-# → Settings → Environment Variables
-# → Add: OPENAI_API_KEY, ADDRESS, FACILITATOR_URL, NETWORK
+# Terminal 2: Start frontend
+cd client
+npm install
+npm run dev
 ```
 
-Full deployment guide: [VERCEL_SETUP.md](./VERCEL_SETUP.md)
-
-### Other Platforms
-- **Railway**: `railway up`
-- **Fly.io**: `fly deploy`
-- **Render**: Connect repo and configure build
+Open [http://localhost:5173](http://localhost:5173)
 
 ---
 
